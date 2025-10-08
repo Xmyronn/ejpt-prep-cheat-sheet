@@ -1,0 +1,77 @@
+# Pivoting (Method 3 - Main)
+
+Exploit Target 1
+
+- Gain a Meterpreter session on **Target 1**.
+    
+
+Check network interfaces
+
+- Run `ipconfig` (or `ifconfig`).
+    
+- Look for extra network adapters (`eth1`, etc.).
+    
+
+Add route to subnet
+
+- In Meterpreter:
+    
+    `run autoroute -s <subnet/24>`
+    
+- This routes traffic for the new subnet.
+    
+
+Background the session
+
+- Put the Meterpreter in the background.
+    
+
+Port scan Target 2
+
+- Use Metasploit’s **port scanner module** to find open ports on **Target 2**.
+    
+
+Port forwarding
+
+- Return to the Meterpreter session on **Target 1**.
+    
+- Forward the desired port from **Target 2** to the attacker:
+    
+    `portfwd add -l <local_port> -p <remote_port> -r <Target2_IP>`
+    
+    Example:
+    
+    `portfwd add -l 1234 -p 80 -r <Target2_IP>`
+    
+
+Scan forwarded port
+
+- In Metasploit, run:
+    
+    `db_nmap -p1234 localhost`
+    
+- This scans the forwarded service as if it were local.
+    
+
+Exploit
+
+- If a vulnerability is found, use the matching MSF exploit module.
+    
+- Set payload to **bind_tcp** (since we’re pivoting).
+    
+
+---
+
+ **Key Notes**
+
+- `autoroute` → enables subnet reachability.
+    
+- `portfwd` → maps internal services to localhost.
+    
+- `db_nmap` → scans forwarded ports.
+    
+- Payload should be **bind_tcp**, because reverse_tcp might not reach you through multiple pivots.
+
+run arp_scanner -r 10.0.0.0/24 (we can see this to check which host is online on other internet)
+
+arp -a to see other devices
